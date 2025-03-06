@@ -1,23 +1,36 @@
-const {app, BrowserWindow} = require("electron")
-const DiscoveryService = require("./back-end/discovery/discovery-service");
-const discoveryService = require("./back-end/discovery/discovery-service");
+const {app, BrowserWindow, ipcMain} = require("electron")
+const path = require("path")
+const discoveryService = require("./back-end/discovery/discovery-service.js");
 
 let mainWindow;
 
 const createWindow = () => {
     const mainWindow = new BrowserWindow({
         width: 800,
-        height: 600
+        height: 600,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js'),
+            contextIsolation : true,
+            nodeIntegration: false
+        }
     })
 
-    mainWindow.loadFile("index.html")
+    mainWindow.loadURL('http://localhost:3000');
+
     mainWindow.webContents.openDevTools()
+    discoveryService.setMainWindow(mainWindow);
+
+    return mainWindow
+
 }
 
 app.whenReady().then(() => {
-    createWindow()
+    createWindow();
 
-    discoveryService.start()
+    discoveryService.start();
+    ipcMain.handle('get-devices', () => {
+        return discoveryService.getDevices();
+    });
 })
 
 app.on('window-all-closed', () => {
@@ -33,3 +46,12 @@ app.on('activate', () => {
         createWindow();
     }
 });
+
+ipcMain.handle('get-devices', async () => {
+    return discoveryService.getDevices();
+  });
+  
+  ipcMain.handle('connect-to-device', async (event, deviceId) => {
+    // Votre logique de connexion
+    return { success: true, deviceId };
+  });
