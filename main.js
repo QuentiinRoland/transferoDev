@@ -47,11 +47,7 @@ app.on('activate', () => {
     }
 });
 
-ipcMain.handle('get-devices', async () => {
-    return discoveryService.getDevices();
-  });
-  
-  ipcMain.handle('connect-to-device', async (event, deviceId) => {
-    // Votre logique de connexion
-    return { success: true, deviceId };
-  });
+ipcMain.handle('connect-to-device', async (event, deviceId) => {
+// Votre logique de connexion
+return { success: true, deviceId };
+});
